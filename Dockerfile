@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "gunicorn", "-w 4", "--timeout 60", "-b 0.0.0.0:80", "photohack.app:app" ]
+CMD [ "gunicorn", "-w 4", "-t 60", "-b 0.0.0.0:80", "photohack.app:app" ]
