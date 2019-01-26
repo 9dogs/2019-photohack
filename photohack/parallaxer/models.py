@@ -10,7 +10,7 @@ import scipy.misc
 import tensorflow as tf
 from PIL import Image
 
-from parallaxer.utils import post_process_disparity
+from photohack.parallaxer.utils import post_process_disparity
 
 monodepth_parameters = namedtuple(
     'parameters', 'encoder height width batch_size num_threads '
