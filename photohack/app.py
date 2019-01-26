@@ -104,4 +104,5 @@ def results(results_id):
             {''.join(table_rows)}
         </tbody>
     </table>
+    <a href="{url_for('index')}">Return to upload</a>
     """
