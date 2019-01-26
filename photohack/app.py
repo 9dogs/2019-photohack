@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import uuid1
 
 import scipy.misc
-from flask import Flask, redirect, request, send_file, url_for
+from flask import Flask, abort, redirect, request, send_file, url_for
 from photohack.parallaxer.models import DeeplabModel, MonodepthModel
 from photohack.parallaxer.pipeline import process_file
 
@@ -88,7 +88,10 @@ def image(results_id, step):
     except KeyError:
         return 'Invalid image step.', 400
     image_path = UPLOADS_DIR / str(results_id) / step.value.name
-    return send_file(str(image_path), mimetype=step.value.mime)
+    try:
+        return send_file(str(image_path), mimetype=step.value.mime)
+    except FileNotFoundError:
+        abort(404)
 
 
 @app.route('/results/<uuid:results_id>')
