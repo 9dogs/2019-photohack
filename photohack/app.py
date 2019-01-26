@@ -3,11 +3,10 @@ from collections import namedtuple
 from enum import Enum
 from pathlib import Path
 from uuid import uuid1
+
 import scipy.misc
-
 from flask import Flask, redirect, request, send_file, url_for
-
-from photohack.parallaxer.models import MonodepthModel, DeeplabModel
+from photohack.parallaxer.models import DeeplabModel, MonodepthModel
 from photohack.parallaxer.pipeline import process_file
 
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

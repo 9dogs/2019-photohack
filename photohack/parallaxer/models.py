@@ -9,7 +9,8 @@ from tarfile import ReadError
 import numpy as np
 import scipy.misc
 import tensorflow as tf
-from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE
+from photohack.parallaxer.consts import (
+    DEEPLAB_INPUT_SIZE, MONODEPTH_INPUT_SIZE)
 from photohack.parallaxer.utils import post_process_disparity
 from PIL import Image
 
@@ -27,7 +28,7 @@ class DeeplabModel:
                  'deeplabv3_pascal_train_aug_2018_01_04.tar.gz')
     INPUT_TENSOR_NAME = 'ImageTensor:0'
     OUTPUT_TENSOR_NAME = 'SemanticPredictions:0'
-    INPUT_SIZE = 513
+    INPUT_SIZE = DEEPLAB_INPUT_SIZE
     FROZEN_GRAPH_NAME = 'frozen_inference_graph'
 
     def __init__(self, tarball_path):
@@ -35,6 +36,7 @@ class DeeplabModel:
 
         :param str tarball_path: path tarball with saved model
         """
+        (self.orig_w_, self.orig_h_, self.orig_ch_num_) = (None, None, None)
         self.graph = tf.Graph()
         file_handle, graph_def = None, None
         # Extract frozen graph from tar archive
@@ -56,6 +58,42 @@ class DeeplabModel:
 
         self.sess = tf.Session(graph=self.graph)
 
+    def resize(self, image, size, method='nearest'):
+        """Resize image to input dimensions.
+
+        :param PIL.Image image: image
+        :param tuple size: size (h, w)
+        :param method: method ('nearest', 'lanczos', 'bilinear', 'bicubic'
+            or 'cubic')
+        :return: resized image
+        :rtype: np.ndarray
+        """
+        h, w = size
+        resized_image = scipy.misc.imresize(
+            np.asarray(image), size=(h, w), interp=method)
+        return resized_image
+
+    def preprocess_image(self, image):
+        """Scale image to fit input dimensions
+
+        :param PIL.image image: input image
+        :return: processed image
+        :rtype: PIL.image
+        """
+        h, w = self.INPUT_SIZE
+        processed_image = self.resize(image, (h, w), method='lanczos')
+        return processed_image
+
+    def postprocess_result(self, result):
+        """Resize segmentation map to fit original image.
+
+        :param result:
+        :return:
+        """
+        h, w = self.orig_h_, self.orig_w_
+        resized = self.resize(result, (h, w), method='nearest')
+        return resized
+
     def run(self, image):
         """Runs inference on a single image.
 
@@ -64,16 +102,15 @@ class DeeplabModel:
             map of `resized_image`
         :rtype: tuple
         """
-        width, height = image.size
-        resize_ratio = 1.0 * self.INPUT_SIZE / max(width, height)
-        target_size = (int(resize_ratio * width), int(resize_ratio * height))
-        resized_image = image.convert('RGB').resize(target_size,
-                                                    Image.ANTIALIAS)
+        (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
+            image).shape
+        processed_image = self.preprocess_image(image)
         batch_seg_map = self.sess.run(
             self.OUTPUT_TENSOR_NAME,
-            feed_dict={self.INPUT_TENSOR_NAME: [np.asarray(resized_image)]})
+            feed_dict={self.INPUT_TENSOR_NAME: [np.asarray(processed_image)]})
         seg_map = batch_seg_map[0]
-        return resized_image, seg_map
+        result = self.postprocess_result(seg_map)
+        return result
 
     def run_on_url(self, url):
         """Inferences DeepLab model and visualizes result.
@@ -110,19 +147,18 @@ class MonodepthModel(DeeplabModel):
         """
         super().__init__(tarball_path)
 
-    def _preprocess_image(self, image):
+    def preprocess_image(self, image):
         """Resize the image to fit INPUT_SIZE and concat to its flipped
         version.
 
         :param PIL.Image image: image
         :return:
         """
-        (self.original_height_, self.original_width_,
-         self.num_channels_) = np.asarray(image).shape
-        input_image = scipy.misc.imresize(
-            image, [self.INPUT_SIZE[0], self.INPUT_SIZE[1]], interp='lanczos')
-        input_image = input_image.astype(np.float32) / 255
-        input_images = np.stack((input_image, np.fliplr(input_image)), 0)
+        h, w = self.INPUT_SIZE
+        processed_image = self.resize(image, (h, w), method='lanczos')
+        processed_image = processed_image.astype(np.float32) / 255
+        input_images = np.stack(
+            (processed_image, np.fliplr(processed_image)), 0)
         return input_images
 
     def run(self, image):
@@ -133,10 +169,12 @@ class MonodepthModel(DeeplabModel):
             map of `resized_image`
         :rtype: tuple
         """
-        images = self._preprocess_image(image)
+        (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
+            image).shape
+        images = self.preprocess_image(image)
         depth = self.sess.run(
             self.OUTPUT_TENSOR_NAME, feed_dict={'input_image:0': images})
         disp_pp = post_process_disparity(depth.squeeze()).astype(np.float32)
         disp_to_img = scipy.misc.imresize(
-            disp_pp.squeeze(), [self.original_height_, self.original_width_])
-        return disp_pp, disp_to_img
+            disp_pp.squeeze(), [self.orig_h_, self.orig_w_])
+        return disp_to_img
