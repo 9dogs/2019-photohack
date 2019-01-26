@@ -10,7 +10,6 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from matplotlib import gridspec
-
 from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE, MONODEPTH_MODEL
 
 

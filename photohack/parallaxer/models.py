@@ -4,14 +4,14 @@ import tarfile
 import urllib.request
 from collections import namedtuple
 from io import BytesIO
+from tarfile import ReadError
 
 import numpy as np
 import scipy.misc
 import tensorflow as tf
-from PIL import Image
-
 from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE
 from photohack.parallaxer.utils import post_process_disparity
+from PIL import Image
 
 monodepth_parameters = namedtuple(
     'parameters', 'encoder height width batch_size num_threads '
@@ -36,18 +36,18 @@ class DeepLabModel:
         :param str tarball_path: path tarball with saved model
         """
         self.graph = tf.Graph()
-
-        graph_def = None
-        # Extract frozen graph from tar archive.
-        tar_file = tarfile.open(tarball_path)
-        for tar_info in tar_file.getmembers():
-            if self.FROZEN_GRAPH_NAME in os.path.basename(tar_info.name):
-                file_handle = tar_file.extractfile(tar_info)
-                graph_def = tf.GraphDef.FromString(file_handle.read())
-                break
-
-        tar_file.close()
-
+        file_handle, graph_def = None, None
+        # Extract frozen graph from tar archive
+        try:
+            tar_file = tarfile.open(tarball_path)
+            for tar_info in tar_file.getmembers():
+                if self.FROZEN_GRAPH_NAME in os.path.basename(tar_info.name):
+                    file_handle = tar_file.extractfile(tar_info)
+        except ReadError:
+            # Assume ordinary file
+            file_handle = open(tarball_path, 'rb')
+        if file_handle:
+            graph_def = tf.GraphDef.FromString(file_handle.read())
         if graph_def is None:
             raise RuntimeError('Cannot find inference graph in tar archive.')
 
@@ -93,7 +93,7 @@ class DeepLabModel:
         return resized_im, seg_map
 
 
-class MonodepthModel:
+class MonodepthModel(DeepLabModel):
     """MonoDepth model and inference.
 
     For details see: https://github.com/mrharicot/monodepth"""
@@ -108,26 +108,7 @@ class MonodepthModel:
 
         :param str tarball_path: path tarball with saved model
         """
-        self.graph = tf.Graph()
-
-        graph_def = None
-        # Extract frozen graph from tar archive.
-        tar_file = tarfile.open(tarball_path)
-        for tar_info in tar_file.getmembers():
-            if self.FROZEN_GRAPH_NAME in os.path.basename(tar_info.name):
-                file_handle = tar_file.extractfile(tar_info)
-                graph_def = tf.GraphDef.FromString(file_handle.read())
-                break
-
-        tar_file.close()
-
-        if graph_def is None:
-            raise RuntimeError('Cannot find inference graph in tar archive.')
-
-        with self.graph.as_default():
-            tf.import_graph_def(graph_def, name='')
-
-        self.sess = tf.Session(graph=self.graph)
+        super().__init__(tarball_path)
 
     def _preprocess_image(self, image):
         """Resize the image to fit INPUT_SIZE and concat to its flipped
