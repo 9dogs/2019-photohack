@@ -105,3 +105,9 @@ venv.bak/
 
 # JetBrains
 .idea
+
+# Uploads
+/uploads
+
+# Models
+/models
