@@ -98,9 +98,8 @@ class DeeplabModel:
         """Runs inference on a single image.
 
         :param PIL.Image image: raw input image
-        :return: RGB image resized from original input image and Segmentation
-            map of `resized_image`
-        :rtype: tuple
+        :return: Segmentation map of image
+        :rtype: np.ndarray
         """
         (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
             image).shape
@@ -165,9 +164,8 @@ class MonodepthModel(DeeplabModel):
         """Runs inference on a single image.
 
         :param PIL.Image image: raw input image
-        :return: RGB image resized from original input image and Segmentation
-            map of `resized_image`
-        :rtype: tuple
+        :return: Segmentation map of image
+        :rtype: np.ndarray
         """
         (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
             image).shape
