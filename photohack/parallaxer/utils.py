@@ -10,6 +10,8 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from matplotlib import gridspec
 
+from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE
+
 
 def create_pascal_label_colormap():
     """Creates a label colormap used in PASCAL VOC segmentation benchmark.
@@ -207,7 +209,6 @@ def meta_graph_from_model(checkpoint_file, input_width, input_height,
 
         def __init__(self, x, model):
             self.use_deconv = False
-
             self.output = self.build_model(x, model)
 
         def get_output(self):
@@ -431,8 +432,9 @@ def meta_graph_from_model(checkpoint_file, input_width, input_height,
                       'output_dir graph')
 
     output_dir = output_dir or Path(checkpoint_file).parent
-    arg = Args(2, 'vgg', input_height, input_width, checkpoint_file, 'models',
-               output_dir / f'{checkpoint_file}.pb')
+    height, width = MONODEPTH_INPUT_SIZE
+    arg = Args(2, 'resnet', height, width, checkpoint_file,
+               'models', output_dir / f'{checkpoint_file}.pb')
 
     # Image placeholder
     x = tf.placeholder(

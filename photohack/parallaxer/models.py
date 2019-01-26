@@ -10,6 +10,7 @@ import scipy.misc
 import tensorflow as tf
 from PIL import Image
 
+from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE
 from photohack.parallaxer.utils import post_process_disparity
 
 monodepth_parameters = namedtuple(
@@ -99,7 +100,7 @@ class MonodepthModel:
 
     INPUT_TENSOR_NAME = 'input_image'
     OUTPUT_TENSOR_NAME = 'model/output_depth:0'
-    INPUT_SIZE = (256, 512)  # height, width
+    INPUT_SIZE = MONODEPTH_INPUT_SIZE
     FROZEN_GRAPH_NAME = 'frozen_inference_graph'
 
     def __init__(self, tarball_path):
