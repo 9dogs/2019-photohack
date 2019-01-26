@@ -120,5 +120,3 @@ def results(results_id):
     </table>
     <a href="{url_for('index')}">Return to upload</a>
     """
-
-app.run()
