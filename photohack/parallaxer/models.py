@@ -20,7 +20,7 @@ monodepth_parameters = namedtuple(
                   'lr_loss_weight full_summary')
 
 
-class DeepLabModel:
+class DeeplabModel:
     """DeepLab model and inference."""
 
     MODEL_URL = ('http://download.tensorflow.org/models/'
@@ -93,7 +93,7 @@ class DeepLabModel:
         return resized_im, seg_map
 
 
-class MonodepthModel(DeepLabModel):
+class MonodepthModel(DeeplabModel):
     """MonoDepth model and inference.
 
     For details see: https://github.com/mrharicot/monodepth"""

@@ -3,8 +3,12 @@ from collections import namedtuple
 from enum import Enum
 from pathlib import Path
 from uuid import uuid1
+import scipy.misc
 
 from flask import Flask, redirect, request, send_file, url_for
+
+from photohack.parallaxer.models import MonodepthModel, DeeplabModel
+from photohack.parallaxer.pipeline import process_file
 
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UPLOADS_DIR = BASE_DIR / 'uploads'
@@ -18,6 +22,14 @@ ALLOWED_EXTENSIONS = (
     'jpeg',
     'png',
 )
+
+#: Models
+MODELS = {
+    'depth': MonodepthModel(
+        MODELS_DIR / 'model_city2kitti_resnet.pb'),
+    'segmentation': DeeplabModel(
+        MODELS_DIR / 'deeplabv3_pascal_train_aug_2018_01_04.tar.gz'),
+    'inpainting': None}
 
 ImageStepFile = namedtuple('ImageStep', 'name mime')
 
@@ -64,6 +76,10 @@ def upload():
     new_dir.mkdir()
     original_filename = str(new_dir / ImageStep.original.value.name)
     uploaded_file.save(original_filename)
+    seg_map, depth_map = process_file(original_filename, MODELS['depth'],
+                                      MODELS['segmentation'])
+    scipy.misc.imsave(ImageStep.depth_estimation.name, depth_map)
+    scipy.misc.imsave(ImageStep.segmentation.name, seg_map)
     return redirect(url_for('results', results_id=results_id))
 
 
