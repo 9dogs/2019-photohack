@@ -1,12 +1,12 @@
 """Models."""
 import os
-import scipy.misc
 import tarfile
 import urllib.request
 from collections import namedtuple
 from io import BytesIO
 
 import numpy as np
+import scipy.misc
 import tensorflow as tf
 from PIL import Image
 
