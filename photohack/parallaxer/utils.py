@@ -433,7 +433,7 @@ def meta_graph_from_model(checkpoint_file, output_dir=None):
     output_dir = output_dir or Path(checkpoint_file).parent
     height, width = MONODEPTH_INPUT_SIZE
     arg = Args(2, MONODEPTH_MODEL, height, width, checkpoint_file,
-               'models', output_dir / f'{checkpoint_file}.pb')
+               'models', str(output_dir / f'{checkpoint_file}.pb'))
 
     # Image placeholder
     x = tf.placeholder(
