@@ -20,7 +20,6 @@ if not MODELS_DIR.exists():
 ALLOWED_EXTENSIONS = (
     'jpg',
     'jpeg',
-    'png',
 )
 
 #: Models
