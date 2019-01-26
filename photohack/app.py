@@ -74,7 +74,7 @@ def upload():
     new_dir.mkdir()
     original_filename = str(new_dir / ImageStep.original.value.name)
     uploaded_file.save(original_filename)
-    seg_map, depth_map = process_file(original_filename, MODELS['depth'],
+    depth_map, seg_map = process_file(original_filename, MODELS['depth'],
                                       MODELS['segmentation'])
     depth_path = new_dir / ImageStep.depth_estimation.value.name
     scipy.misc.imsave(depth_path, depth_map)
