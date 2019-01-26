@@ -10,7 +10,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from matplotlib import gridspec
 
-from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE
+from photohack.parallaxer.consts import MONODEPTH_INPUT_SIZE, MONODEPTH_MODEL
 
 
 def create_pascal_label_colormap():
@@ -196,8 +196,7 @@ def post_process_disparity(disp):
     return r_mask * l_disp + l_mask * r_disp + (1.0 - l_mask - r_mask) * m_disp
 
 
-def meta_graph_from_model(checkpoint_file, input_width, input_height,
-                          output_dir=None):
+def meta_graph_from_model(checkpoint_file, output_dir=None):
     """Convert MonoDepth model to MetaGraph.
 
     :param checkpoint_file:
@@ -433,7 +432,7 @@ def meta_graph_from_model(checkpoint_file, input_width, input_height,
 
     output_dir = output_dir or Path(checkpoint_file).parent
     height, width = MONODEPTH_INPUT_SIZE
-    arg = Args(2, 'resnet', height, width, checkpoint_file,
+    arg = Args(2, MONODEPTH_MODEL, height, width, checkpoint_file,
                'models', output_dir / f'{checkpoint_file}.pb')
 
     # Image placeholder
