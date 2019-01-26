@@ -76,8 +76,8 @@ def upload():
     uploaded_file.save(original_filename)
     seg_map, depth_map = process_file(original_filename, MODELS['depth'],
                                       MODELS['segmentation'])
-    scipy.misc.imsave(ImageStep.depth_estimation.name, depth_map)
-    scipy.misc.imsave(ImageStep.segmentation.name, seg_map)
+    scipy.misc.imsave(ImageStep.depth_estimation.value.name, depth_map)
+    scipy.misc.imsave(ImageStep.segmentation.value.name, seg_map)
     return redirect(url_for('results', results_id=results_id))
 
 
