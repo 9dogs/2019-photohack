@@ -25,10 +25,8 @@ ALLOWED_EXTENSIONS = (
 
 #: Models
 MODELS = {
-    'depth': MonodepthModel(
-        MODELS_DIR / 'model_city2kitti_resnet.pb'),
-    'segmentation': DeeplabModel(
-        MODELS_DIR / 'deeplabv3_pascal_train_aug_2018_01_04.tar.gz'),
+    'depth': MonodepthModel(MODELS_DIR / 'model_city2kitti_resnet.pb'),
+    'segmentation': DeeplabModel(MODELS_DIR / 'deeplabv3.pb'),
     'inpainting': None}
 
 ImageStepFile = namedtuple('ImageStep', 'name mime')
@@ -122,3 +120,5 @@ def results(results_id):
     </table>
     <a href="{url_for('index')}">Return to upload</a>
     """
+
+app.run()
