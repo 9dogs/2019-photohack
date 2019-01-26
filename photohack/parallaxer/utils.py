@@ -1,6 +1,7 @@
 """Utilities."""
 import logging
 import math
+import os
 from collections import namedtuple
 from pathlib import Path
 
@@ -430,10 +431,10 @@ def meta_graph_from_model(checkpoint_file, output_dir=None):
                       'batch_size encoder img_height img_width ckpt_file '
                       'output_dir graph')
 
-    output_dir = output_dir or Path(checkpoint_file).parent
+    output_dir = output_dir or str(Path(checkpoint_file).parent.resolve())
     height, width = MONODEPTH_INPUT_SIZE
     arg = Args(2, MONODEPTH_MODEL, height, width, checkpoint_file,
-               'models', str(output_dir / f'{checkpoint_file}.pb'))
+               'models', os.path.join(output_dir, f'{checkpoint_file}.pb'))
 
     # Image placeholder
     x = tf.placeholder(
@@ -485,8 +486,7 @@ def meta_graph_from_model(checkpoint_file, output_dir=None):
     output_graph_def = tf.graph_util.remove_training_nodes(output_graph_def)
 
     # Finally we serialize and dump the output graph to the filesystem
-    output_graph = arg.output_dir + '/' + arg.graph
-    with tf.gfile.GFile(output_graph, "wb") as f:
+    with tf.gfile.GFile(arg.graph, "wb") as f:
         f.write(output_graph_def.SerializeToString())
 
     logging.info('Frozen graph file {} created successfully'.format(arg.graph))
