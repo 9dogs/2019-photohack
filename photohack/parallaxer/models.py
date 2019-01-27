@@ -101,7 +101,7 @@ class DeeplabModel:
         :return: Segmentation map of image
         :rtype: np.ndarray
         """
-        (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
+        (self.orig_h_, self.orig_w_, self.orig_ch_num_) = np.asarray(
             image).shape
         processed_image = self.preprocess_image(image)
         batch_seg_map = self.sess.run(
@@ -167,7 +167,7 @@ class MonodepthModel(DeeplabModel):
         :return: Segmentation map of image
         :rtype: np.ndarray
         """
-        (self.orig_w_, self.orig_h_, self.orig_ch_num_) = np.asarray(
+        (self.orig_h_, self.orig_w_, self.orig_ch_num_) = np.asarray(
             image).shape
         images = self.preprocess_image(image)
         depth = self.sess.run(

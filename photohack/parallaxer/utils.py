@@ -89,7 +89,7 @@ def vis_segmentation(image, seg_map):
 LABEL_NAMES = np.asarray([
     'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
     'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
-    'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tv'
+    'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tv',
 ])
 #: PASCAL color map for classes
 FULL_COLOR_MAP = label_to_color_image(
@@ -196,7 +196,7 @@ def post_process_disparity(disp):
     return r_mask * l_disp + l_mask * r_disp + (1.0 - l_mask - r_mask) * m_disp
 
 
-def meta_graph_from_model(checkpoint_file, output_dir=None):
+def convert_checkpoint_to_metagraph(checkpoint_file, output_dir=None):
     """Convert MonoDepth model to MetaGraph.
 
     :param checkpoint_file:
