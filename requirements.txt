@@ -3,6 +3,6 @@ gunicorn==19.9.0
 # Math stack
 numpy==1.16.0
 scipy==1.2.0
-tensorflow==1.12.0
+tensorflow==2.7.2
 matplotlib==3.0.2
 Pillow==5.4.1
